@@ -16,7 +16,18 @@ size = width, height = 800, 600
 # 创建一个窗口
 screen = pygame.display.set_mode(size)
 
+# 定义黑色的rgb值，这里black的类型是元组。你可以认为是一个列表
+# 等价 black = (0, 0, 0)
+# 我们用一个元组来描述了黑色的rgb值
+# 颜色对应rgb值是什么可以在http://tool.oschina.net/commons?type=3 查到
+black = 0, 0, 0
+
 while True:
     for event in pygame.event.get():  # 获取事件
         if event.type == pygame.QUIT: sys.exit()  # 如果是退出事件(点击关闭), 则退出程序
+
+    screen.fill((0, 0, 0))  # 填充黑色背景, (0,0,0)
+
+    pygame.display.flip()  # 刷新整个窗口, 如果不刷新，那对屏幕的改动无法生效
+
     time.sleep(1)  # 休眠1s, 避免循环太快, 以后会删掉这行代码
