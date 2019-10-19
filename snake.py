@@ -38,10 +38,7 @@ while True:
     screen.fill(black)  # 填充黑色背景
 
     # 每次循环加上一个移动单位, 生成新的位置
-    left = snake_head_pos[0] + move_to[0]
-    top = snake_head_pos[1] + move_to[1]
-    snake_head_pos = (left, top)
-    snake_head = pygame.Rect(snake_head_pos, snake_head_size)  # 重新创建一个蛇头
+    snake_head = snake_head.move(move_to)
     pygame.draw.rect(screen, snake_head_color, snake_head)  # 画蛇头
 
     pygame.draw.rect(screen, food_color, food)  # 画食物
