@@ -1,6 +1,7 @@
 # -*- coding:utf-8 -*-
 import sys, time
 import pygame
+import random
 
 # 初始化所有模块，当你不知道需要用到哪些模块的时候，可以这样做
 # 初始化就是做一些准备工作，你可以认为是固定用法，想用pygame， 就得先调用这个init()函数
@@ -31,6 +32,17 @@ snake_head_size = (5, 5)
 # 创建一个蛇头
 snake_head = pygame.Rect(snake_head_pos, snake_head_size)
 
+# 定义食物的颜色
+food_color = pygame.Color(255, 0, 0)
+# 定义食物位置
+food_pos_width = random.randint(0, width)  # 随机生成横坐标
+food_pos_height = random.randint(0, height)  # 随机生成纵坐标
+food_pos = (food_pos_width, food_pos_height)
+# 定义食物大小
+food_size = (5, 5)
+# 创建一个食物
+food = pygame.Rect(food_pos, food_size)
+
 while True:
     for event in pygame.event.get():  # 获取事件
         if event.type == pygame.QUIT: sys.exit()  # 如果是退出事件(点击关闭), 则退出程序
@@ -39,6 +51,9 @@ while True:
 
     # 画蛇头到屏幕中
     pygame.draw.rect(screen, snake_head_color, snake_head)
+
+    # 画食物到食物中
+    pygame.draw.rect(screen, food_color, food)
 
     pygame.display.flip()  # 刷新整个窗口, 如果不刷新，那对屏幕的改动无法生效
 
