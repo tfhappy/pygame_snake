@@ -47,7 +47,8 @@ while True:
     for event in pygame.event.get():  # 获取事件
         if event.type == pygame.QUIT: sys.exit()  # 如果是退出事件(点击关闭), 则退出程序
 
-    screen.fill((0, 0, 0))  # 填充黑色背景, (0,0,0)
+    # 额...这里参数一开始就应该是black, 而不是写死的(0,0,0) 忽略这里的改动
+    screen.fill(black)  # 填充黑色背景, (0,0,0)
 
     # 画蛇头到屏幕中
     pygame.draw.rect(screen, snake_head_color, snake_head)
