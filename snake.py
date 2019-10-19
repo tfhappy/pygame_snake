@@ -22,11 +22,23 @@ screen = pygame.display.set_mode(size)
 # 颜色对应rgb值是什么可以在http://tool.oschina.net/commons?type=3 查到
 black = 0, 0, 0
 
+# 定义蛇头的颜色
+snake_head_color = pygame.Color(220, 220, 220)
+# 定义蛇头初始位置(坐标原点在左上角)
+snake_head_pos = (10, 10)
+# 定义蛇头大小（宽,高）
+snake_head_size = (5, 5)
+# 创建一个蛇头
+snake_head = pygame.Rect(snake_head_pos, snake_head_size)
+
 while True:
     for event in pygame.event.get():  # 获取事件
         if event.type == pygame.QUIT: sys.exit()  # 如果是退出事件(点击关闭), 则退出程序
 
     screen.fill((0, 0, 0))  # 填充黑色背景, (0,0,0)
+
+    # 画蛇头到屏幕中
+    pygame.draw.rect(screen, snake_head_color, snake_head)
 
     pygame.display.flip()  # 刷新整个窗口, 如果不刷新，那对屏幕的改动无法生效
 
