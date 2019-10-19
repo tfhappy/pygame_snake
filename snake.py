@@ -34,6 +34,15 @@ move_to = move_right  # 初始方向为向右
 while True:
     for event in pygame.event.get():
         if event.type == pygame.QUIT: sys.exit()
+        if event.type == pygame.KEYDOWN:  # 只监听按键按下
+            if event.key == pygame.K_UP and move_to != move_down:  # 要排除相反的方向
+                move_to = move_up
+            if event.key == pygame.K_DOWN and move_to != move_up:
+                move_to = move_down
+            if event.key == pygame.K_LEFT and move_to != move_right:
+                move_to = move_left
+            if event.key == pygame.K_RIGHT and move_to != move_left:
+                move_to = move_right
 
     screen.fill(black)  # 填充黑色背景
 
