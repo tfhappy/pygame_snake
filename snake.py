@@ -1,5 +1,5 @@
 # -*- coding:utf-8 -*-
-import sys, time
+import sys
 import pygame
 import random
 
@@ -22,14 +22,28 @@ food_pos = (food_pos_width, food_pos_height)
 food_size = (5, 5)
 food = pygame.Rect(food_pos, food_size)  # 创建一个食物
 
+# 移动速度(每次移动的像素值)
+speed = 3
+# 移动单位
+move_right = (speed, 0)
+move_left = (-speed, 0)
+move_up = (0, -speed)  # 越往上, top值越小
+move_down = (0, speed)
+# 移动方向
+move_to = move_right  # 初始方向为向右
 while True:
     for event in pygame.event.get():
         if event.type == pygame.QUIT: sys.exit()
 
     screen.fill(black)  # 填充黑色背景
 
+    # 每次循环加上一个移动单位, 生成新的位置
+    left = snake_head_pos[0] + move_to[0]
+    top = snake_head_pos[1] + move_to[1]
+    snake_head_pos = (left, top)
+    snake_head = pygame.Rect(snake_head_pos, snake_head_size)  # 重新创建一个蛇头
     pygame.draw.rect(screen, snake_head_color, snake_head)  # 画蛇头
+
     pygame.draw.rect(screen, food_color, food)  # 画食物
 
     pygame.display.flip()  # 刷新屏幕
-    time.sleep(1)
