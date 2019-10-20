@@ -5,48 +5,102 @@ import time
 import pygame
 import random
 
-size = width, height = 800, 600
-black = (0, 0, 0)  # 定义黑色的rgb值
+# 颜色
+black = (0, 0, 0)
 yellow = (255, 255, 0)
+gray = (220, 220, 220)
+white = (255, 255, 255)
+red = (255, 0, 0)
+
+# 尺寸
+cell_length = 10  # 单位长度
+rows, columns = 100, 50  # 行数, 列数
+
+# 初始位置相关
+snake_head_pos = (10, 10)
+food_pos = (30, 30)
+
+# 速度
+re_frame = 1  # 每个动作重复多少帧, 数字越大移动越慢, 最小为1
+
+screen_width = rows * cell_length
+screen_height = columns * cell_length
+screen_size = (screen_width, screen_height)
+cell_size = (cell_length, cell_length)
 
 pygame.init()  # 初始化所有模块
 pygame.display.set_caption('贪吃蛇')  # 设置窗口标题
-screen = pygame.display.set_mode(size)  # 创建一个窗口
+screen = pygame.display.set_mode(screen_size)  # 创建一个窗口
 
-snake_head_color = pygame.Color(220, 220, 220)
-snake_head_pos = (10, 10)
-snake_head_size = (5, 5)
-snake_head = pygame.Rect(snake_head_pos, snake_head_size)  # 创建一个蛇头
+# 蛇头
+snake_head_color = pygame.Color(*gray)
+snake_head = pygame.Rect(snake_head_pos, cell_size)
 
 # 蛇身
-snake_body_color = pygame.Color(255, 255, 255)
-snake_body_size = (5, 5)
+snake_body_color = pygame.Color(*white)
 snake_body = []
 
 
-def create_food():
-    food_pos_width = random.randrange(0, width, 5)
-    food_pos_height = random.randrange(0, height, 5)
-    food_pos = (food_pos_width, food_pos_height)
-    return pygame.Rect(food_pos, food_size)  # 创建一个食物
+def collide(snake_head, snake_body, food):
+    if snake_head.colliderect(food):
+        return True
+    if snake_head.collidelist(snake_body) != -1:
+        return True
+    if food.collidelist(snake_body) != -1:
+        return True
+
+    return False
 
 
-food_color = pygame.Color(255, 0, 0)
-food_size = (5, 5)
-food = create_food()
+def create_food(snake_head, snake_body):
+    snake_lens = len(snake_body) + 1
+    cell_num = rows * columns
+    if snake_lens < int(cell_num / 2):
+        # 蛇的长度小于屏幕的一半, 随机生成
+        while True:
+            food_pos_left = random.randrange(0, rows, 1)
+            food_pos_top = random.randrange(0, columns, 1)
+            food_pos = (food_pos_left * cell_length,
+                        food_pos_top * cell_length)
+            food = pygame.Rect(food_pos, cell_size)
+            if not collide(snake_head, snake_body, food):
+                break
+    else:
+        select_point = []
+        for top in range(columns):
+            for left in range(rows):
+                left_s = left * cell_length
+                top_s = top * cell_length
+                if snake_head.collidepoint(left_s, top_s):
+                    continue
+                is_collide = False
+                for body_item in snake_body:
+                    if body_item.collidepoint(left_s, top_s):
+                        is_collide = True
+                        break
+                if not is_collide:
+                    select_point.append((left_s, top_s))
+        if len(select_point) == 0:
+            print("没有空余的地方生成食物了,你赢了")
+            game_over()
+        food_pos = select_point[random.randint(0, len(select_point) - 1)]
+        food = pygame.Rect(food_pos, cell_size)
+    return food
 
-# 移动速度(每次移动的像素值)
-speed = 1
+
+food_color = pygame.Color(*red)
+food = pygame.Rect(food_pos, cell_size)
+
 # 移动单位
-move_right = (5, 0)
-move_left = (-5, 0)
-move_up = (0, -5)  # 越往上, top值越小
-move_down = (0, 5)
+move_right = (cell_length, 0)
+move_left = (-cell_length, 0)
+move_up = (0, -cell_length)  # 越往上, top值越小
+move_down = (0, cell_length)
 # 移动方向
 move_to = move_right  # 初始方向为向右
 
 
-def game_over(screen):
+def game_over():
     # pygame.font.Font: 创建一个字体对象
     font = pygame.font.Font(None, 72)
     # pygame.font.Font.render: 画字到一个suface
@@ -59,54 +113,66 @@ def game_over(screen):
     screen_rect = screen.blit(font_surface, font_rect)
     # update: 局部更新窗口
     pygame.display.update(screen_rect)
-    # 等待游戏退出, todo: pygame.event.wait()
+    # 等待游戏退出
     while True:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT: sys.exit()
-        time.sleep(0.1)
-
-
-while True:
-    for event in pygame.event.get():
+        event = pygame.event.wait()
         if event.type == pygame.QUIT: sys.exit()
-        if event.type == pygame.KEYDOWN:  # 只监听按键按下
-            if event.key == pygame.K_UP and move_to != move_down:  # 要排除相反的方向
-                move_to = move_up
-            if event.key == pygame.K_DOWN and move_to != move_up:
-                move_to = move_down
-            if event.key == pygame.K_LEFT and move_to != move_right:
-                move_to = move_left
-            if event.key == pygame.K_RIGHT and move_to != move_left:
-                move_to = move_right
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_q: sys.exit()
+
+
+def new_view(snake_head, snake_body, food):
     # 越界退出游戏
-    if snake_head.left < 0 or snake_head.right > width:
-        game_over(screen)
-    if snake_head.top < 0 or snake_head.bottom > height:
-        game_over(screen)
+    if snake_head.left < 0 or snake_head.right > screen_width:
+        game_over()
+    if snake_head.top < 0 or snake_head.bottom > screen_height:
+        game_over()
 
     screen.fill(black)  # 填充黑色背景
 
     need_create_food = False
-    for i in range(speed):  # 每次只移动一个size
-        # 记录原始头的块
-        snake_head_origin = snake_head.copy()
-        # 每次循环加上一个移动单位, 生成新的位置
-        snake_head = snake_head.move(move_to)
+    # 记录原始头的块
+    snake_head_origin = snake_head.copy()
+    # 每次循环加上一个移动单位, 生成新的位置
+    snake_head = snake_head.move(move_to)
 
-        snake_body.append(snake_head_origin)  # 蛇头放一个
-        if snake_head.colliderect(food):  # 吃到食物
-            need_create_food = True
-            # print(snake_head.colliderect(snake_head_origin))
-        else:
-            snake_body = snake_body[1:]  # 移除尾巴; 尾巴放列表前面
+    snake_body.append(snake_head_origin)  # 蛇头放一个
+    if snake_head.colliderect(food):  # 吃到食物
+        need_create_food = True
+    else:
+        snake_body = snake_body[1:]  # 移除尾巴; 尾巴放列表前面
 
-        if snake_head.collidelist(snake_body) != -1:
-            # print(snake_head.collidelist(snake_body))
-            game_over(screen)
-
+    if snake_head.collidelist(snake_body) != -1:
+        game_over()
     if need_create_food:
-        need_create_food = False
-        food = create_food()
+        food = create_food(snake_head, snake_body)
+
+    return snake_head, snake_body, food
+
+
+count = 0
+while True:
+    if count < re_frame:
+        count += 1
+    else:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT: sys.exit()
+            if event.type == pygame.KEYDOWN:  # 只监听按键按下
+                if event.key == pygame.K_UP and move_to != move_down:  # 要排除相反的方向
+                    move_to = move_up
+                    break
+                if event.key == pygame.K_DOWN and move_to != move_up:
+                    move_to = move_down
+                    break
+                if event.key == pygame.K_LEFT and move_to != move_right:
+                    move_to = move_left
+                    break
+                if event.key == pygame.K_RIGHT and move_to != move_left:
+                    move_to = move_right
+                    break
+                if event.key == pygame.K_q:
+                    sys.exit()
+        snake_head, snake_body, food = new_view(snake_head, snake_body, food)
+        count = 0
 
     # 画身子
     for body_item in snake_body:
